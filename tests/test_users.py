@@ -119,23 +119,13 @@ def test_update_user(client, user, token):
     }
 
 
-def test_update_wrong_user(client, token):
-    # Criando um registro para "fausto"
-    response_user = client.post(
-        '/users',
-        json={
-            'username': 'fausto',
-            'email': 'fausto@example.com',
-            'password': 'secret',
-        },
-    )
-
+def test_update_user_with_wrong_user(client, other_user, token):
     response = client.put(
-        f'/users/{response_user.json()["id"]}',
+        f'/users/{other_user.id}',
         headers={'Authorization': f'Bearer {token}'},
         json={
-            'username': 'dummy',
-            'email': 'dummy@domain.com',
+            'username': 'bob',
+            'email': 'bob@example.com',
             'password': 'mynewpassword',
         },
     )
@@ -144,23 +134,12 @@ def test_update_wrong_user(client, token):
     assert response.json() == {'detail': 'Not enough permissions'}
 
 
-def test_update_integrity_error(client, user, token):
-    # Criando um registro para "fausto"
-    client.post(
-        '/users',
-        json={
-            'username': 'fausto',
-            'email': 'fausto@example.com',
-            'password': 'secret',
-        },
-    )
-
-    # Alterando o user.username das fixture para fausto
+def test_update_integrity_error(client, user, other_user, token):
     response_update = client.put(
         f'/users/{user.id}',
         headers={'Authorization': f'Bearer {token}'},
         json={
-            'username': 'fausto',
+            'username': f'{other_user.username}',
             'email': 'bob@example.com',
             'password': 'mynewpassword',
         },
@@ -184,19 +163,9 @@ def test_delete_user(client, user, token):
     }
 
 
-def test_delete_wrong_user(client, token):
-    # Criando um registro para "fausto"
-    response_user = client.post(
-        '/users',
-        json={
-            'username': 'fausto',
-            'email': 'fausto@example.com',
-            'password': 'secret',
-        },
-    )
-
+def test_delete_user_with_wrong_user(client, other_user, token):
     response = client.delete(
-        f'/users/{response_user.json()["id"]}',
+        f'/users/{other_user.id}',
         headers={'Authorization': f'Bearer {token}'},
     )
 
