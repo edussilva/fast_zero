@@ -16,21 +16,24 @@ class TodoFactory(factory.Factory):
     user_id = 1
 
 
-def test_create_todo(client, token):
-    response = client.post(
-        '/todos/',
-        headers={'Authorization': f'Bearer {token}'},
-        json={
-            'title': 'Test Todo',
-            'description': 'Test todo description',
-            'state': 'draft',
-        },
-    )
+def test_create_todo(client, token, mock_db_time):
+    with mock_db_time(model=Todo) as time:
+        response = client.post(
+            '/todos/',
+            headers={'Authorization': f'Bearer {token}'},
+            json={
+                'title': 'Test Todo',
+                'description': 'Test todo description',
+                'state': 'draft',
+            },
+        )
     assert response.json() == {
         'id': 1,
         'title': 'Test Todo',
         'description': 'Test todo description',
         'state': 'draft',
+        'created_at': time.isoformat(),
+        'updated_at': time.isoformat(),
     }
 
 
@@ -184,8 +187,7 @@ async def test_delete_todo(session, client, user, token):
     await session.commit()
 
     response = client.delete(
-        f'/todos/{todo.id}',
-        headers={'Authorization': f'Bearer {token}'}
+        f'/todos/{todo.id}', headers={'Authorization': f'Bearer {token}'}
     )
 
     assert response.status_code == HTTPStatus.OK
@@ -196,8 +198,7 @@ async def test_delete_todo(session, client, user, token):
 
 def test_delete_todo_error(client, token):
     response = client.delete(
-        '/todos/10',
-        headers={'Authorization': f'Bearer {token}'}
+        '/todos/10', headers={'Authorization': f'Bearer {token}'}
     )
 
     assert response.status_code == HTTPStatus.NOT_FOUND
