@@ -31,7 +31,6 @@ async def test_create_user(session, mock_db_time):
 @pytest.mark.asyncio
 async def test_create_todo(session, user, mock_db_time):
     with mock_db_time(model=Todo) as time:
-
         todo = Todo(
             title='Test Todo',
             description='Test Desc',
